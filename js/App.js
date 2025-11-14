@@ -1,59 +1,156 @@
-// Classe principal da aplicação
 class App {
-    constructor() {
-        this.audioProcessor = new AudioProcessor();
-        this.visualizationEngine = new VisualizationEngine('audioCanvas');
-        this.uiManager = new UIManager(this);
-        this.exportManager = new ExportManager(this.visualizationEngine);
-        
-        // Inicialização
-        this.init();
-    }
-    
-    init() {
-        // TODO: inicializar a aplicação
-        console.log('App inicializada');
-    }
-    
-    startMicrophone() {
-        // TODO: iniciar captura do microfone:
-        this.audioProcessor.startMicrophone();
+  constructor() {
+    this.audioProcessor = new AudioProcessor();
+    this.visualizationEngine = new VisualizationEngine(
+      "audioCanvas",
+      this.audioProcessor
+    ); // Add audioProcessor here!
+    this.uiManager = new UIManager(this);
+    this.exportManager = new ExportManager(this.visualizationEngine);
 
+    // Inicialização
+    this.init();
+  }
 
-        console.log('Iniciando microfone...');
+  init() {
+    // TODO: inicializar a aplicação
+    console.log("App inicializada");
+  }
+
+  async startMicrophone() {
+    console.log("Iniciando microfone...");
+
+    try {
+      // Parar qualquer áudio anterior
+      this.stopAudio();
+
+      // Iniciar captura do microfone
+      await this.audioProcessor.startMicrophone();
+
+      // Atualizar UI
+      this.uiManager.setButtonStates(true);
+      this.uiManager.updateAudioInfo({ status: "Microfone ativo", level: 0 });
+
+      // Iniciar visualização
+      if (!this.visualizationEngine.isRunning) {
+        this.visualizationEngine.start();
+      }
+
+      this.isRunning = true;
+
+      // Iniciar monitorização de níveis
+      this.startAudioLevelMonitoring();
+    } catch (error) {
+      console.error("Erro ao iniciar microfone:", error);
+      this.uiManager.showError(`Erro ao acessar microfone: ${error.message}`);
+      this.uiManager.setButtonStates(false);
     }
-    
-    loadAudioFile(file) {
-        // TODO: carregar ficheiro de áudio
-        console.log('Carregando ficheiro de áudio...');
+  }
+  async loadAudioFile(file) {
+    console.log("Carregando ficheiro de áudio:", file.name);
+
+    try {
+      this.stopAudio();
+
+      await this.audioProcessor.loadAudioFile(file);
+
+      this.uiManager.setButtonStates(true);
+      this.uiManager.updateAudioInfo({
+        status: `Reproduzindo: ${file.name}`,
+        level: 0,
+      });
+
+      // Iniciar visualização
+      if (!this.visualizationEngine.isRunning) {
+        this.visualizationEngine.start();
+      }
+
+      this.isRunning = true;
+
+      // Iniciar monitorização de níveis
+      this.startAudioLevelMonitoring();
+    } catch (error) {
+      console.error("Erro ao carregar ficheiro:", error);
+      this.uiManager.showError(`Erro ao carregar ficheiro: ${error.message}`);
+      this.uiManager.setButtonStates(false);
     }
-    
-    stopAudio() {
-        // TODO: parar áudio
-        console.log('Parando áudio...');
+  }
+
+  stopAudio() {
+    console.log("Parando áudio...");
+
+    // Parar processamento de áudio
+    this.audioProcessor.stop();
+
+    // Parar monitorização de níveis
+    if (this.audioLevelInterval) {
+      clearInterval(this.audioLevelInterval);
+      this.audioLevelInterval = null;
     }
-    
-    setVisualization(type) {
-        // TODO: definir tipo de visualização
-        console.log(`Definindo visualização: ${type}`);
+
+    // Atualizar UI
+    this.uiManager.setButtonStates(false);
+    this.uiManager.updateAudioInfo({ status: "Parado", level: 0 });
+
+    this.isRunning = false;
+  }
+
+  setVisualization(type) {
+    console.log(`Definindo visualização: ${type}`);
+
+    const success = this.visualizationEngine.setVisualization(type);
+
+    if (success) {
+      // Atualizar painel de propriedades
+      this.uiManager.updatePropertiesPanel();
+    } else {
+      this.uiManager.showError(`Tipo de visualização inválido: ${type}`);
     }
-    
-    exportFrame() {
-        // TODO: exportar frame atual
-        console.log('Exportando frame...');
+
+    return success;
+  }
+
+  exportFrame() {
+    console.log("Exportando frame...");
+    this.exportManager.exportAsPNG();
+  }
+
+  startAudioLevelMonitoring() {
+    // Limpar intervalo anterior se existir
+    if (this.audioLevelInterval) {
+      clearInterval(this.audioLevelInterval);
     }
-    
-    destroy() {
-        // TODO: limpar recursos
-        console.log('Destruindo aplicação...');
-    }
+
+    // Atualizar nível de áudio a cada 100ms
+    this.audioLevelInterval = setInterval(() => {
+      if (this.isRunning && this.audioProcessor.isPlaying) {
+        const level = this.audioProcessor.calculateAudioLevel();
+        this.uiManager.updateAudioInfo({
+          status: this.audioProcessor.mediaStream
+            ? "Microfone ativo"
+            : "Reproduzindo",
+          level: Math.round(level * 100),
+        });
+      }
+    }, 100);
+  }
+
+  destroy() {
+    console.log("Destruindo aplicação...");
+
+    // Parar áudio
+    this.stopAudio();
+
+    // Parar visualização
+    this.visualizationEngine.stop();
+
+    // Limpar listeners
+    window.removeEventListener("resize", this.visualizationEngine.resize);
+
+    // Limpar referências
+    this.audioProcessor = null;
+    this.visualizationEngine = null;
+    this.uiManager = null;
+    this.exportManager = null;
+  }
 }
-
-
-// Inicialização da aplicação quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', () => {
-    const app = new App();
-    
-    // Expor app globalmente para debugging (remover em produção)
-    window.app = app;
-});
