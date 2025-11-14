@@ -1,4 +1,4 @@
-/ Processamento de Áudio
+// Processamento de Áudio
 class AudioProcessor {
   constructor() {
     // Initialize AudioContext (with fallback for older browsers)
@@ -227,3 +227,4 @@ class AudioProcessor {
     this.analyser.connect(this.audioContext.destination);
   }
 }
+
