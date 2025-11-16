@@ -55,10 +55,6 @@ class UIManager {
         min = 0.1;
         max = 3;
         step = 0.1;
-      } else if (key === "particleCount") {
-        min = 10;
-        max = 500;
-        step = 10;
       } else if (key === "particleSize") {
         min = 1;
         max = 10;
@@ -222,3 +218,4 @@ class UIManager {
     return container;
   }
 }
+
