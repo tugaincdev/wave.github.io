@@ -5,7 +5,6 @@ class SpectrumVisualization extends AudioVisualization {
     this.properties = {
       barWidth: 4,
       barSpacing: 2,
-      smoothing: 0.8,
     };
   }
 
@@ -37,3 +36,4 @@ class SpectrumVisualization extends AudioVisualization {
     this.ctx.shadowBlur = 0;
   }
 }
+
