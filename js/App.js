@@ -96,19 +96,19 @@ class App {
   }
 
   setVisualization(type) {
-    console.log(`Definindo visualização: ${type}`);
+  console.log(`Definindo visualização: ${type}`);
 
-    const success = this.visualizationEngine.setVisualization(type);
+  const success = this.visualizationEngine.setVisualization(type);
 
-    if (success) {
-      // Atualizar painel de propriedades
-      this.uiManager.updatePropertiesPanel();
-    } else {
-      this.uiManager.showError(`Tipo de visualização inválido: ${type}`);
-    }
-
-    return success;
+  if (success) {
+    
+    this.uiManager.updatePropertiesPanel();
+  } else {
+    this.uiManager.showError(`Tipo de visualização inválido: ${type}`);
   }
+
+  return success;
+}
 
   exportFrame() {
     console.log("Exportando frame...");
