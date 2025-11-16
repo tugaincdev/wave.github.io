@@ -43,10 +43,6 @@ class UIManager {
         min = 0;
         max = 10;
         step = 1;
-      } else if (key === "smoothing") {
-        min = 0;
-        max = 1;
-        step = 0.05;
       } else if (key === "lineWidth") {
         min = 1;
         max = 10;
@@ -218,4 +214,5 @@ class UIManager {
     return container;
   }
 }
+
 
