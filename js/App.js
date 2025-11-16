@@ -15,6 +15,7 @@ class App {
   init() {
     // TODO: inicializar a aplicação
     console.log("App inicializada");
+    this.uiManager.updatePropertiesPanel();
   }
 
   async startMicrophone() {
