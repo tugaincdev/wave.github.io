@@ -3,7 +3,6 @@ class ParticleVisualization extends AudioVisualization {
     super(canvas, audioProcessor);
     this.name = "Particles";
     this.properties = {
-      particleCount: 100,
       particleSize: 3,
     };
     this.particles = [];
@@ -12,7 +11,7 @@ class ParticleVisualization extends AudioVisualization {
 
   initParticles() {
     this.particles = [];
-    for (let i = 0; i < this.properties.particleCount; i++) {
+    for (let i = 0; i < 100; i++) {
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
@@ -58,3 +57,4 @@ class ParticleVisualization extends AudioVisualization {
     this.ctx.shadowBlur = 0;
   }
 }
+
